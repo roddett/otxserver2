@@ -320,6 +320,11 @@
 	vipListDefaultLimit = 20
 	vipListDefaultPremiumLimit = 100
 
+	-- AutoLoot
+	useAutoLoot = true
+	-- # set 0 to disable message
+	autoLootMessageType = 24 
+
 	-- Outfits
 	allowChangeOutfit = true
 	allowChangeColors = true

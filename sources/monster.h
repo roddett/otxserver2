@@ -133,6 +133,9 @@ class Monster : public Creature
 		virtual BlockType_t blockHit(Creature* attacker, CombatType_t combatType, int32_t& damage,
 			bool checkDefense = false, bool checkArmor = false, bool reflect = true, bool field = false, bool element = false);
 
+		void executeAutoLoot(Container* container, const DeathList& deathList);
+		bool executeAutoLoot(Player* player, Container* container, std::ostringstream& description, bool isLooted = false);
+
 	private:
 		CreatureList targetList;
 		std::unordered_map<uint32_t, Creature*> friendList;

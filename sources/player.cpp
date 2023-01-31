@@ -98,6 +98,8 @@ Player::Player(const std::string& _name, ProtocolGame_ptr p):
 	setVocation(0);
 	setParty(NULL);
 
+	autoLootSettings = {0};
+
 	transferContainer.setParent(NULL);
 	for(int32_t i = 0; i < 11; ++i)
 	{

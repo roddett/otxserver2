@@ -423,7 +423,7 @@ bool IOLoginData::loadPlayer(Player* player, const std::string& name, bool preLo
 	query << "SELECT `id`, `account_id`, `group_id`, `world_id`, `sex`, `vocation`, `experience`, `level`, "
 	<< "`maglevel`, `health`, `healthmax`, `blessings`, `pvp_blessing`, `mana`, `manamax`, `manaspent`, `soul`, "
 	<< "`lookbody`, `lookfeet`, `lookhead`, `looklegs`, `looktype`, `lookaddons`, `posx`, `posy`, "
-	<< "`posz`, `cap`, `lastlogin`, `lastlogout`, `lastip`, `conditions`, `skull`, `skulltime`, `guildnick`, "
+	<< "`posz`, `cap`, `lastlogin`, `lastlogout`, `lastip`, `conditions`, `autoloot`, `skull`, `skulltime`, `guildnick`, "
 	<< "`rank_id`, `town_id`, `balance`, `stamina`, `direction`, `loss_experience`, `loss_mana`, `loss_skills`, "
 	<< "`loss_containers`, `loss_items`, `marriage`, `promotion`, `description`, `offlinetraining_time`, `offlinetraining_skill`, "
 	<< "`save` FROM `players` WHERE "
@@ -507,6 +507,32 @@ bool IOLoginData::loadPlayer(Player* player, const std::string& name, bool preLo
 			player->storedConditionList.push_back(condition);
 		else
 			delete condition;
+	}
+
+	uint64_t autoLootSize = 0;
+	const char* autoLootList = result->getDataStream("autoloot", autoLootSize);
+
+	propStream.init(autoLootList, autoLootSize);
+
+	int32_t i = 0;
+	uint8_t byte = 0;
+
+	while (propStream.getByte(byte))
+	{
+		int32_t type = byte;
+		if (type == AUTOLOOT_ITEM)
+		{
+			uint32_t itemId;
+			if (propStream.getLong(itemId))
+				player->setAutoLootItemId(itemId);
+		}
+
+		if (type == AUTOLOOT_SETTING)
+		{
+			uint16_t value;
+			if (propStream.getShort(value))
+				player->autoLootSettings[i++] = value;
+		}
 	}
 
 	player->vocationId = result->getDataInt("vocation");
@@ -948,6 +974,24 @@ bool IOLoginData::savePlayer(Player* player, bool preSave/* = true*/, bool shall
 	uint32_t conditionsSize = 0;
 	const char* conditions = propWriteStream.getStream(conditionsSize);
 	query << "`conditions` = " << db->escapeBlob(conditions, conditionsSize) << ", ";
+
+	//serialize autoloot
+	propWriteStream.clear();
+	for (AutoLootSet::const_iterator it = player->getAutoLootList().begin(); it != player->getAutoLootList().end(); ++it)
+	{
+		propWriteStream.addByte(AUTOLOOT_ITEM);
+		propWriteStream.addLong(*it);
+	}
+
+	for (uint16_t value : player->autoLootSettings)
+	{
+		propWriteStream.addByte(AUTOLOOT_SETTING);
+		propWriteStream.addShort(value);
+	}
+
+	uint32_t autoLootSize = 0;
+	const char* autoLoot = propWriteStream.getStream(autoLootSize);
+	query << "`autoloot` = " << db->escapeBlob(autoLoot, autoLootSize) << ", ";
 
 	query << "`loss_experience` = " << (uint32_t)player->getLossPercent(LOSS_EXPERIENCE) << ", ";
 	query << "`loss_mana` = " << (uint32_t)player->getLossPercent(LOSS_MANA) << ", ";

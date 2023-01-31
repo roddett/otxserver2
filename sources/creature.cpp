@@ -816,6 +816,13 @@ void Creature::dropCorpse(DeathList deathList)
 
 	g_game.internalAddItem(NULL, tile, corpse, INDEX_WHEREEVER, FLAG_NOLIMIT);
 	dropLoot(corpse->getContainer());
+
+	if (g_config.getBool(ConfigManager::USE_AUTOLOOT))
+	{
+		if (Monster* monster = getMonster())
+			monster->executeAutoLoot(corpse->getContainer(), deathList);
+	}
+
 	g_game.startDecay(corpse);
 }
 

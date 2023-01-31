@@ -362,6 +362,8 @@ bool ConfigManager::load()
 	m_confBool[ALLOW_CORPSE_BLOCK] = getGlobalBool("allowCorpseBlock", false);
 	m_confBool[ALLOW_INDEPENDENT_PUSH] = getGlobalBool("allowIndependentCreaturePush", true);
 	m_confBool[PZLOCK_ON_ATTACK_SKULLED_PLAYERS] = getGlobalBool("pzlockOnAttackSkulledPlayers", false);
+	m_confNumber[AUTOLOOT_MESSAGE_TYPE] = getGlobalNumber("autoLootMessageType", 24);
+	m_confBool[USE_AUTOLOOT] = getGlobalBool("useAutoLoot", false);
 	m_loaded = true;
 	return true;
 }

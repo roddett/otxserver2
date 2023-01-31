@@ -336,6 +336,15 @@ class LuaInterface
 
 		virtual void registerFunctions();
 
+		//autoloot functions
+		static int32_t luaSetAutoLootSetting(lua_State* L);
+		static int32_t luaGetAutoLootSetting(lua_State* L);
+		static int32_t luaGetAutoLootItemId(lua_State* L);
+		static int32_t luaSetAutoLootItemId(lua_State* L);
+		static int32_t luaEraseAutoLootItemId(lua_State* L);
+		static int32_t luaClearAutoLootList(lua_State* L);
+		static int32_t luaGetAutoLootList(lua_State* L);
+
 		//lua functions
 		static int32_t luaDoRemoveItem(lua_State* L);
 		static int32_t luaDoPlayerFeed(lua_State* L);

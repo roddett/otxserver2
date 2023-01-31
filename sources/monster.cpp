@@ -1356,6 +1356,118 @@ void Monster::updateLookDirection()
 	g_game.internalCreatureTurn(this, newDir);
 }
 
+bool Monster::executeAutoLoot(Player* player, Container* container, std::ostringstream& description, bool isLooted/* = false*/)
+{
+	if (!container)
+		return false;
+
+	bool autoLootExecuted = false;
+	const AutoLootSet& autoLootList = player->getAutoLootList();
+	if (autoLootList.empty())
+		return false;
+
+	ItemList containerItems = container->getItemList();
+	if (containerItems.empty())
+		return false;
+
+	for (ItemList::const_iterator it = containerItems.begin(); it != containerItems.end(); ++it)
+	{
+		Item* subItem = (*it);
+		const ItemType& itemType = Item::items[subItem->getID()];
+
+		if (subItem->getContainer() && subItem->getContainer()->getItemHoldingCount())
+		{
+			if (executeAutoLoot(player, subItem->getContainer(), description, autoLootExecuted))
+				autoLootExecuted = true;
+
+			continue;
+		}
+
+		if ((itemType.worth && !player->getAutoLootSetting(AUTOLOOT_GOLD))
+			|| (!itemType.worth && autoLootList.find(subItem->getID()) == autoLootList.end()))
+			continue;
+
+		bool begin = true;
+		if (Item* tmpItem = subItem->clone())
+		{
+			if (itemType.worth)
+			{
+				if (player->getAutoLootSetting(AUTOLOOT_BANK))
+				{
+					if (g_game.internalRemoveItem(NULL, subItem) == RET_NOERROR)
+					{
+						if (autoLootExecuted || isLooted)
+							description << ", ";
+
+						description << tmpItem->getNameDescription();
+						player->balance += (itemType.worth * tmpItem->getItemCount());
+
+						delete tmpItem;
+						tmpItem = NULL;
+
+						autoLootExecuted = true;
+					}
+				}
+			}
+
+			if (tmpItem)
+			{
+				if (g_game.internalPlayerAddItem(NULL, player, tmpItem, false) == RET_NOERROR)
+				{
+					if (autoLootExecuted || isLooted)
+						description << ", ";
+
+					description << tmpItem->getNameDescription();
+					g_game.internalRemoveItem(NULL, subItem);
+
+					autoLootExecuted = true;
+				}
+				else
+					delete tmpItem;
+			}
+		}
+	}
+
+	return autoLootExecuted;
+}
+
+void Monster::executeAutoLoot(Container* corpse, const DeathList& deathList)
+{
+	if (!corpse)
+		return;
+
+	Player* owner = NULL;
+	if (g_config.getBool(ConfigManager::CHECK_CORPSE_OWNER))
+	{
+		uint32_t ownerId = corpse->getCorpseOwner();
+		if (ownerId)
+			owner = g_game.getPlayerByGuid(ownerId);
+	}
+
+	std::ostringstream description;
+	for (DeathList::const_iterator it = deathList.begin(); it != deathList.end(); it++)
+	{
+		if (!(*it).isCreatureKill())
+			continue;
+
+		if (Player* killer = (*it).getKillerCreature()->getPlayer())
+		{
+			if (owner && killer != owner)
+				continue;
+
+			if (killer->getAutoLootSetting(AUTOLOOT_STATUS) && executeAutoLoot(killer, corpse, description))
+			{
+				MessageClasses messageType = (MessageClasses)g_config.getNumber(ConfigManager::AUTOLOOT_MESSAGE_TYPE);
+				if (messageType > MSG_NONE)
+				{
+					killer->sendTextMessage(messageType, "[Auto-Loot]: You looted " + description.str() + ".");
+					description.str("");
+				}
+			}
+		}
+	}
+}
+
 void Monster::dropLoot(Container* corpse)
 {
 	if(corpse && lootDrop == LOOT_DROP_FULL)

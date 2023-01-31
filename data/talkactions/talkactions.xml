@@ -40,6 +40,7 @@
 	<talkaction log="yes" group="4" access="3" words="/baninfo" event="function" value="banishmentInfo"/>
 
 	<!-- Players -->
+	<talkaction access="0-4" words="!autoloot" event="script" value="autoloot.lua"/>
 	<talkaction access="0-4" words="!frags;/frags" event="script" value="frags.lua"/>
 	<talkaction access="0-4" words="!online;/online" event="script" value="online.lua"/>
 	<talkaction access="0-4" words="!uptime;/uptime" event="script" value="uptime.lua"/>

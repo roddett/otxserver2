@@ -196,6 +196,7 @@ class ConfigManager
 			HIGHSCORES_TOP,
 			HIGHSCORES_UPDATETIME,
 			LOGIN_PROTECTION_TIME,
+			AUTOLOOT_MESSAGE_TYPE,
 			LAST_NUMBER_CONFIG /* this must be the last one */
 		};
 
@@ -331,6 +332,7 @@ class ConfigManager
 			ALLOW_CORPSE_BLOCK,
 			ALLOW_INDEPENDENT_PUSH,
 			PZLOCK_ON_ATTACK_SKULLED_PLAYERS,
+			USE_AUTOLOOT,
 			LAST_BOOL_CONFIG /* this must be the last one */
 		};
 

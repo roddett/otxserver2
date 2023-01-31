@@ -1493,6 +1493,27 @@ void LuaInterface::registerFunctions()
 	//example(...)
 	//lua_register(L, "name", C_function);
 
+	//setAutoLootSetting(cid, bool, type)
+	lua_register(m_luaState, "setAutoLootSetting", LuaInterface::luaSetAutoLootSetting);
+
+	//getAutoLootSetting(cid, type)
+	lua_register(m_luaState, "getAutoLootSetting", LuaInterface::luaGetAutoLootSetting);
+
+	//getAutoLootList(cid)
+	lua_register(m_luaState, "getAutoLootList", LuaInterface::luaGetAutoLootList);
+
+	//getAutoLootItemId(cid, itemid)
+	lua_register(m_luaState, "getAutoLootItemId", LuaInterface::luaGetAutoLootItemId);
+
+	//setAutoLootItemId(cid, itemid)
+	lua_register(m_luaState, "setAutoLootItemId", LuaInterface::luaSetAutoLootItemId);
+
+	//eraseAutoLootItemId(cid, itemid)
+	lua_register(m_luaState, "eraseAutoLootItemId", LuaInterface::luaEraseAutoLootItemId);
+
+	//clearAutoLootList(cid)
+	lua_register(m_luaState, "clearAutoLootList", LuaInterface::luaClearAutoLootList);
+
 	//getCreatureHealth(cid)
 	lua_register(m_luaState, "getCreatureHealth", LuaInterface::luaGetCreatureHealth);
 
@@ -10485,13 +10506,167 @@ int32_t LuaInterface::luaDoUpdateHouseAuctions(lua_State* L)
 	return 1;
 }
 
+int32_t LuaInterface::luaGetAutoLootItemId(lua_State* L)
+{
+	//getAutoLootItemId(cid, itemid)
+	int32_t itemId = popNumber(L);
+	ScriptEnviroment* env = getEnv();
+
+	Player* player = env->getPlayerByUID((uint32_t)popNumber(L));
+	if (!player)
+	{
+		errorEx(getError(LUA_ERROR_PLAYER_NOT_FOUND));
+		lua_pushboolean(L, false);
+	}
+	else
+		lua_pushboolean(L, player->getAutoLootItemId(itemId));
+
+	return 1;
+}
+
+int32_t LuaInterface::luaSetAutoLootItemId(lua_State* L)
+{
+	//setAutoLootItemId(cid, itemid)
+	int32_t itemId = popNumber(L);
+	ScriptEnviroment* env = getEnv();
+
+	Player* player = env->getPlayerByUID((uint32_t)popNumber(L));
+	if (!player)
+	{
+		errorEx(getError(LUA_ERROR_PLAYER_NOT_FOUND));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	player->setAutoLootItemId(itemId);
+	lua_pushboolean(L, true);
+	return 1;
+}
+
+int32_t LuaInterface::luaEraseAutoLootItemId(lua_State* L)
+{
+	//eraseAutoLootItemId(cid, itemid)
+	int32_t itemId = popNumber(L);
+	ScriptEnviroment* env = getEnv();
+
+	Player* player = env->getPlayerByUID((uint32_t)popNumber(L));
+	if (!player)
+	{
+		errorEx(getError(LUA_ERROR_PLAYER_NOT_FOUND));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	player->removeAutoLootItemId(itemId);
+	lua_pushboolean(L, true);
+	return 1;
+}
+
+int32_t LuaInterface::luaClearAutoLootList(lua_State* L)
+{
+	//clearAutoLootList(cid)
+	ScriptEnviroment* env = getEnv();
+	Player* player = env->getPlayerByUID((uint32_t)popNumber(L));
+	if (!player)
+	{
+		errorEx(getError(LUA_ERROR_PLAYER_NOT_FOUND));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	player->clearAutoLootList();
+	lua_pushboolean(L, true);
+	return 1;
+}
+
+int32_t LuaInterface::luaGetAutoLootList(lua_State* L)
+{
+	//getAutoLootList(cid)
+	ScriptEnviroment* env = getEnv();
+	Player* player = env->getPlayerByUID((uint32_t)popNumber(L));
+	if (!player)
+	{
+		errorEx(getError(LUA_ERROR_PLAYER_NOT_FOUND));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	int32_t i = 1;
+	lua_newtable(L);
+
+	for (uint32_t itemId : player->getAutoLootList())
+	{
+		lua_pushnumber(L, i++);
+		lua_pushnumber(L, itemId);
+		pushTable(L);
+	}
+
+	return 1;
+}
+
+int32_t LuaInterface::luaSetAutoLootSetting(lua_State* L)
+{
+	//setAutoLootSetting(cid, settingId, value)
+	int32_t value = popNumber(L);
+	int32_t type = popNumber(L);
+
+	ScriptEnviroment* env = getEnv();
+	Player* player = env->getPlayerByUID((uint32_t)popNumber(L));
+	if (!player)
+	{
+		errorEx(getError(LUA_ERROR_PLAYER_NOT_FOUND));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	if (type < AUTOLOOT_FIRST || type > AUTOLOOT_LAST)
+	{
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	player->setAutoLootSetting((AutoLootSettings_t)type, (value != 0));
+	lua_pushboolean(L, true);
+	return 1;
+}
+
+int32_t LuaInterface::luaGetAutoLootSetting(lua_State* L)
+{
+	//getAutoLootSetting(cid, type)
+	int32_t type = popNumber(L);
+	ScriptEnviroment* env = getEnv();
+
+	Player* player = env->getPlayerByUID((uint32_t)popNumber(L));
+	if (!player)
+	{
+		errorEx(getError(LUA_ERROR_PLAYER_NOT_FOUND));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	if (type < AUTOLOOT_FIRST || type > AUTOLOOT_LAST)
+	{
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	lua_pushboolean(L, player->getAutoLootSetting((AutoLootSettings_t)type));
+	return 1;
+}
+
 int32_t LuaInterface::luaGetItemIdByName(lua_State* L)
 {
-	//getItemIdByName(name)
+	//getItemIdByName(name, displayError = false)
+	bool displayError = false;
+	if (lua_gettop(L) > 2)
+		displayError = popBoolean(L);
+
 	int32_t itemId = Item::items.getItemIdByName(popString(L));
 	if(itemId == -1)
 	{
-		errorEx(getError(LUA_ERROR_ITEM_NOT_FOUND));
+		if (displayError)
+			errorEx(getError(LUA_ERROR_ITEM_NOT_FOUND));
+
 		lua_pushboolean(L, false);
 	}
 	else

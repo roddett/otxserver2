@@ -113,6 +113,22 @@ enum GamemasterCondition_t
 	GAMEMASTER_TELEPORT = 2
 };
 
+enum AutoLootSettings_t
+{
+	AUTOLOOT_FIRST = 1,
+	AUTOLOOT_STATUS = AUTOLOOT_FIRST,
+	AUTOLOOT_GOLD,
+	AUTOLOOT_BANK,
+	AUTOLOOT_LAST = AUTOLOOT_BANK
+};
+
+enum AutoLootType_t
+{
+	AUTOLOOT_ITEM = 1,
+	AUTOLOOT_SETTING
+};
+
+typedef std::set<uint32_t> AutoLootSet;
 typedef std::set<uint32_t> VIPSet;
 typedef std::list<std::pair<uint16_t, std::string> > ChannelsList;
 typedef std::vector<std::pair<uint32_t, Container*> > ContainerVector;
@@ -389,6 +405,15 @@ class Player : public Creature, public Cylinder
 		void setSentChat(bool sending) {sentChat = sending;}
 
 		virtual RaceType_t getRace() const {return RACE_BLOOD;}
+
+		//autoloot functions
+		void setAutoLootSetting(AutoLootSettings_t type, bool value) {autoLootSettings[type] = value;}
+		bool getAutoLootSetting(AutoLootSettings_t type) const {return autoLootSettings[type] != 0;}
+		void clearAutoLootList() {autoLootList.clear();}
+		void removeAutoLootItemId(uint32_t itemid) {autoLootList.erase(itemid);}
+		void setAutoLootItemId(uint32_t itemid) {autoLootList.insert(itemid);}
+		bool getAutoLootItemId(uint32_t itemid) const {return (!autoLootList.empty() && autoLootList.find(itemid) != autoLootList.end());}
+		const AutoLootSet& getAutoLootList() const {return autoLootList;}
 
 		//safe-trade functions
 		void setTradeState(tradestate_t state) {tradeState = state;}
@@ -981,6 +1006,9 @@ class Player : public Creature, public Cylinder
 		OutfitMap outfits;
 		LearnedInstantSpellList learnedInstantSpellList;
 		WarMap warMap;
+
+		AutoLootSet autoLootList;
+		std::array<uint16_t, AUTOLOOT_LAST + 1> autoLootSettings;
 
 		friend class Game;
 		friend class LuaInterface;
