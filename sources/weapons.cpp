@@ -382,6 +382,7 @@ bool Weapon::useFist(Player* player, Creature* target)
 	fist.blockedByArmor = true;
 	fist.blockedByShield = true;
 	fist.combatType = COMBAT_PHYSICALDAMAGE;
+	fist.origin = ORIGIN_MELEE;
 
 	Combat::doCombatHealth(player, target, damage, damage, fist);
 	if(!player->hasFlag(PlayerFlag_NotGainSkill) && player->getAddAttackSkill())
@@ -404,6 +405,15 @@ bool Weapon::internalUseWeapon(Player* player, Item* item, Creature* target, int
 		CombatParams _params = params;
 		_params.element.type = item->getElementType();
 		_params.element.damage = getWeaponElementDamage(player, item);
+
+		WeaponType_t weaponType = item->getWeaponType();
+		if (weaponType == WEAPON_WAND)
+			_params.origin = ORIGIN_WAND;
+		else if (weaponType == WEAPON_DIST || weaponType == WEAPON_AMMO)
+			_params.origin = ORIGIN_RANGED;
+		else
+			_params.origin = ORIGIN_MELEE;
+
 		bool isCritical = false;
 		int32_t damage = (getWeaponDamage(player, target, item, isCritical) * modifier) / 100;
 		Combat::doCombatHealth(player, target, damage, damage, _params);

@@ -3971,7 +3971,7 @@ int32_t LuaInterface::luaDoCreatureAddHealth(lua_State* L)
 	{
 		if(healthChange) //do not post with 0 value
 			g_game.combatChangeHealth(healthChange < 1 ? COMBAT_UNDEFINEDDAMAGE : COMBAT_HEALING,
-				NULL, creature, healthChange, hitEffect, hitColor, force);
+				NULL, creature, healthChange, ORIGIN_NONE, hitEffect, hitColor, force);
 
 		lua_pushboolean(L, true);
 	}
@@ -3996,7 +3996,7 @@ int32_t LuaInterface::luaDoCreatureAddMana(lua_State* L)
 	if(Creature* creature = env->getCreatureByUID(popNumber(L)))
 	{
 		if(aggressive)
-			g_game.combatChangeMana(NULL, creature, manaChange);
+			g_game.combatChangeMana(NULL, creature, manaChange/*, ORIGIN_NONE*/);
 		else
 			creature->changeMana(manaChange);
 
@@ -6800,9 +6800,13 @@ int32_t LuaInterface::luaDoCombat(lua_State* L)
 
 int32_t LuaInterface::luaDoCombatAreaHealth(lua_State* L)
 {
-	//doCombatAreaHealth(cid, type, pos, area, min, max, effect[, aggressive])
+	//doCombatAreaHealth(cid, type, pos, area, min, max, effect[, aggressive, origin = ORIGIN_SPELL])
+	CombatOrigin_t origin = ORIGIN_SPELL;
+	if (lua_gettop(L) > 7)
+		origin = (CombatOrigin_t)popNumber(L);
+
 	bool aggressive = true;
-	if(lua_gettop(L) > 7) // shouldn't it be enough if we check only is conditionType == CONDITION_HEALING?
+	if(lua_gettop(L) > 6) // shouldn't it be enough if we check only is conditionType == CONDITION_HEALING?
 		aggressive = popBoolean(L);
 
 	MagicEffect_t effect = (MagicEffect_t)popNumber(L);
@@ -6834,6 +6838,7 @@ int32_t LuaInterface::luaDoCombatAreaHealth(lua_State* L)
 		params.combatType = combatType;
 		params.effects.impact = effect;
 		params.isAggressive = aggressive;
+		params.origin = origin;
 
 		Combat::doCombatHealth(creature, pos, area, minChange, maxChange, params);
 		lua_pushboolean(L, true);
@@ -6849,7 +6854,11 @@ int32_t LuaInterface::luaDoCombatAreaHealth(lua_State* L)
 
 int32_t LuaInterface::luaDoTargetCombatHealth(lua_State* L)
 {
-	//doTargetCombatHealth(cid, target, type, min, max, effect[, aggressive])
+	//doTargetCombatHealth(cid, target, type, min, max, effect[, aggressive, origin = ORIGIN_SPELL])
+	CombatOrigin_t origin = ORIGIN_SPELL;
+	if (lua_gettop(L) > 7)
+		origin = (CombatOrigin_t)popNumber(L);
+
 	bool aggressive = true;
 	if(lua_gettop(L) > 6) // shouldn't it be enough if we check only is conditionType == CONDITION_HEALING?
 		aggressive = popBoolean(L);
@@ -6879,6 +6888,7 @@ int32_t LuaInterface::luaDoTargetCombatHealth(lua_State* L)
 		params.combatType = combatType;
 		params.effects.impact = effect;
 		params.isAggressive = aggressive;
+		params.origin = origin;
 
 		Combat::doCombatHealth(creature, target, minChange, maxChange, params);
 		lua_pushboolean(L, true);
@@ -6894,7 +6904,11 @@ int32_t LuaInterface::luaDoTargetCombatHealth(lua_State* L)
 
 int32_t LuaInterface::luaDoCombatAreaMana(lua_State* L)
 {
-	//doCombatAreaMana(cid, pos, area, min, max, effect[, aggressive])
+	//doCombatAreaMana(cid, pos, area, min, max, effect[, aggressive, origin = ORIGIN_SPELL])
+	CombatOrigin_t origin = ORIGIN_SPELL;
+	if (lua_gettop(L) > 7)
+		origin = (CombatOrigin_t)popNumber(L);
+
 	bool aggressive = true;
 	if(lua_gettop(L) > 6)
 		aggressive = popBoolean(L);
@@ -6925,6 +6939,7 @@ int32_t LuaInterface::luaDoCombatAreaMana(lua_State* L)
 		CombatParams params;
 		params.effects.impact = effect;
 		params.isAggressive = aggressive;
+		params.origin = origin;
 
 		Combat::doCombatMana(creature, pos, area, minChange, maxChange, params);
 		lua_pushboolean(L, true);
@@ -6940,7 +6955,11 @@ int32_t LuaInterface::luaDoCombatAreaMana(lua_State* L)
 
 int32_t LuaInterface::luaDoTargetCombatMana(lua_State* L)
 {
-	//doTargetCombatMana(cid, target, min, max, effect[, aggressive])
+	//doTargetCombatMana(cid, target, min, max, effect[, aggressive, origin = ORIGIN_SPELL])
+	CombatOrigin_t origin = ORIGIN_SPELL;
+	if (lua_gettop(L) > 6)
+		origin = (CombatOrigin_t)popNumber(L);
+
 	bool aggressive = true;
 	if(lua_gettop(L) > 5)
 		aggressive = popBoolean(L);
@@ -6966,6 +6985,7 @@ int32_t LuaInterface::luaDoTargetCombatMana(lua_State* L)
 		CombatParams params;
 		params.effects.impact = effect;
 		params.isAggressive = aggressive;
+		params.origin = origin;
 
 		Combat::doCombatMana(creature, target, minChange, maxChange, params);
 		lua_pushboolean(L, true);

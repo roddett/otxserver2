@@ -496,6 +496,10 @@ bool Combat::setParam(CombatParam_t param, uint32_t value)
 			params.element.type = (CombatType_t)value;
 			break;
 
+		case COMBATPARAM_ORIGIN:
+			params.origin = (CombatOrigin_t)value;
+			break;
+
 		default:
 			break;
 	}
@@ -632,7 +636,7 @@ bool Combat::CombatManaFunc(Creature* caster, Creature* target, const CombatPara
 			change /= 2;
 	}
 
-	if(!g_game.combatChangeMana(caster, target, change))
+	if(!g_game.combatChangeMana(caster, target, change, COMBAT_MANADRAIN, params.origin))
 		return false;
 
 	CombatConditionFunc(caster, target, params, NULL);

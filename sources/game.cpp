@@ -4985,7 +4985,7 @@ bool Game::combatBlockHit(const CombatType_t& combatType, Creature* attacker, Cr
 	return true;
 }
 
-bool Game::combatChangeHealth(const CombatType_t& combatType, Creature* attacker, Creature* target, int32_t healthChange,
+bool Game::combatChangeHealth(const CombatType_t& combatType, Creature* attacker, Creature* target, int32_t healthChange, const CombatOrigin_t origin/* = ORIGIN_NONE*/,
 	const MagicEffect_t& hitEffect/* = MAGIC_EFFECT_UNKNOWN*/, const Color_t& hitColor/* = COLOR_UNKNOWN*/, const bool& force/* = false*/)
 {
 	CombatParams params;
@@ -4993,6 +4993,8 @@ bool Game::combatChangeHealth(const CombatType_t& combatType, Creature* attacker
 	params.effects.color = hitColor;
 
 	params.combatType = combatType;
+	params.origin = origin;
+
 	return combatChangeHealth(params, attacker, target, healthChange, force);
 }
 
@@ -5008,7 +5010,7 @@ bool Game::combatChangeHealth(const CombatParams& params, Creature* attacker, Cr
 		CreatureEventList statsChangeEvents = target->getCreatureEvents(CREATURE_EVENT_STATSCHANGE);
 		for(CreatureEventList::iterator it = statsChangeEvents.begin(); it != statsChangeEvents.end(); ++it)
 		{
-			if(!(*it)->executeStatsChange(target, attacker, STATSCHANGE_HEALTHGAIN, params.combatType, healthChange))
+			if(!(*it)->executeStatsChange(target, attacker, STATSCHANGE_HEALTHGAIN, params.combatType, healthChange, params.origin))
 				deny = true;
 		}
 
@@ -5107,7 +5109,7 @@ bool Game::combatChangeHealth(const CombatParams& params, Creature* attacker, Cr
 				damage = std::max((int32_t)0, damage + elementDamage - manaDamage);
 
 				elementDamage = 0; // TODO: I don't know how it works ;(
-				if(manaDamage && combatChangeMana(attacker, target, -manaDamage, params.combatType, true))
+				if(manaDamage && combatChangeMana(attacker, target, -manaDamage, params.combatType, params.origin, true))
 					addMagicEffect(list, targetPos, MAGIC_EFFECT_LOSE_ENERGY);
 			}
 
@@ -5119,7 +5121,7 @@ bool Game::combatChangeHealth(const CombatParams& params, Creature* attacker, Cr
 				CreatureEventList statsChangeEvents = target->getCreatureEvents(CREATURE_EVENT_STATSCHANGE);
 				for(CreatureEventList::iterator it = statsChangeEvents.begin(); it != statsChangeEvents.end(); ++it)
 				{
-					if(!(*it)->executeStatsChange(target, attacker, STATSCHANGE_HEALTHLOSS, params.combatType, damage))
+					if(!(*it)->executeStatsChange(target, attacker, STATSCHANGE_HEALTHLOSS, params.combatType, damage, params.origin))
 						deny = true;
 				}
 
@@ -5291,7 +5293,7 @@ bool Game::combatChangeHealth(const CombatParams& params, Creature* attacker, Cr
 }
 
 bool Game::combatChangeMana(Creature* attacker, Creature* target, int32_t manaChange,
-	const CombatType_t& combatType/* = COMBAT_MANADRAIN*/, const bool& inherited/* = false*/)
+	const CombatType_t& combatType/* = COMBAT_MANADRAIN*/, const CombatOrigin_t origin/* = ORIGIN_NONE*/, const bool& inherited/* = false*/)
 {
 	const Position& targetPos = target->getPosition();
 	if(manaChange > 0)
@@ -5300,7 +5302,7 @@ bool Game::combatChangeMana(Creature* attacker, Creature* target, int32_t manaCh
 		CreatureEventList statsChangeEvents = target->getCreatureEvents(CREATURE_EVENT_STATSCHANGE);
 		for(CreatureEventList::iterator it = statsChangeEvents.begin(); it != statsChangeEvents.end(); ++it)
 		{
-			if(!(*it)->executeStatsChange(target, attacker, STATSCHANGE_MANAGAIN, COMBAT_HEALING, manaChange))
+			if(!(*it)->executeStatsChange(target, attacker, STATSCHANGE_MANAGAIN, COMBAT_HEALING, manaChange, origin))
 				deny = true;
 		}
 
@@ -5390,7 +5392,7 @@ bool Game::combatChangeMana(Creature* attacker, Creature* target, int32_t manaCh
 			CreatureEventList statsChangeEvents = target->getCreatureEvents(CREATURE_EVENT_STATSCHANGE);
 			for(CreatureEventList::iterator it = statsChangeEvents.begin(); it != statsChangeEvents.end(); ++it)
 			{
-				if(!(*it)->executeStatsChange(target, attacker, STATSCHANGE_MANALOSS, combatType, manaLoss))
+				if(!(*it)->executeStatsChange(target, attacker, STATSCHANGE_MANALOSS, combatType, manaLoss, origin))
 					deny = true;
 			}
 

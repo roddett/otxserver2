@@ -77,6 +77,7 @@ struct CombatParams
 		isAggressive = useCharges = true;
 		dispelType = CONDITION_NONE;
 		combatType = COMBAT_NONE;
+		origin = ORIGIN_SPELL;
 		itemId = 0;
 
 		targetCallback = NULL;
@@ -85,6 +86,7 @@ struct CombatParams
 	}
 
 	bool blockedByArmor, blockedByShield, targetCasterOrTopMost, targetPlayersOrSummons, differentAreaDamage, useCharges, isAggressive;
+	CombatOrigin_t origin;
 	ConditionType_t dispelType;
 	CombatType_t combatType, elementType;
 	uint32_t itemId, elementDamage;

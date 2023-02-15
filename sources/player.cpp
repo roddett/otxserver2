@@ -2422,7 +2422,7 @@ BlockType_t Player::blockHit(Creature* attacker, CombatType_t combatType, int32_
 			reflected = -reflected;
 
 		if(!g_game.combatBlockHit(combatType, this, attacker, reflected, false, false, true, false))
-			g_game.combatChangeHealth(combatType, NULL, attacker, reflected);
+			g_game.combatChangeHealth(combatType, NULL, attacker, reflected, ORIGIN_REFLECT);
 	}
 
 	return blockType;

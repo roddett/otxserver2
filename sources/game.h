@@ -628,11 +628,11 @@ class Game
 		bool combatBlockHit(const CombatType_t& combatType, Creature* attacker, Creature* target,
 			int32_t& healthChange, const bool& checkDefense, const bool& checkArmor, const bool& field = false, const bool& element = false);
 
-		bool combatChangeHealth(const CombatType_t& combatType, Creature* attacker, Creature* target, int32_t healthChange,
+		bool combatChangeHealth(const CombatType_t& combatType, Creature* attacker, Creature* target, int32_t healthChange, const CombatOrigin_t origin = ORIGIN_NONE,
 			const MagicEffect_t& hitEffect = MAGIC_EFFECT_UNKNOWN, const Color_t& hitColor = COLOR_UNKNOWN, const bool& force = false);
 		bool combatChangeHealth(const CombatParams& params, Creature* attacker, Creature* target, int32_t healthChange, const bool& force);
 		bool combatChangeMana(Creature* attacker, Creature* target, int32_t manaChange,
-			const CombatType_t& combatType = COMBAT_MANADRAIN, const bool& inherited = false);
+			const CombatType_t& combatType = COMBAT_MANADRAIN, const CombatOrigin_t origin = ORIGIN_NONE, const bool& inherited = false);
 
 		//animation help functions
 		void addCreatureHealth(const Creature* target);

@@ -738,7 +738,7 @@ bool ConditionRegeneration::executeCondition(Creature* creature, int32_t interva
 			if(healthGain && creature->getHealth() < creature->getMaxHealth())
 			{
 				if(getSubId() != 0)
-					g_game.combatChangeHealth(COMBAT_HEALING, creature, creature, healthGain);
+					g_game.combatChangeHealth(COMBAT_HEALING, creature, creature, healthGain, ORIGIN_CONDITION);
 				else
 					creature->changeHealth(healthGain);
 			}
@@ -750,7 +750,7 @@ bool ConditionRegeneration::executeCondition(Creature* creature, int32_t interva
 			if(manaGain && creature->getMana() < creature->getMaxMana())
 			{
 				if(getSubId() != 0)
-					g_game.combatChangeMana(creature, creature, manaGain);
+					g_game.combatChangeMana(creature, creature, manaGain, COMBAT_MANADRAIN, ORIGIN_CONDITION);
 				else
 					creature->changeMana(manaGain);
 			}
@@ -1188,7 +1188,7 @@ bool ConditionDamage::doDamage(Creature* creature, int32_t damage)
 	if(g_game.combatBlockHit(combatType, attacker, creature, damage, false, false, field))
 		return false;
 
-	return g_game.combatChangeHealth(combatType, attacker, creature, damage);
+	return g_game.combatChangeHealth(combatType, attacker, creature, damage, ORIGIN_CONDITION);
 }
 
 void ConditionDamage::addCondition(Creature* creature, const Condition* addCondition)
