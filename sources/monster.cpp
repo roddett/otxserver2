@@ -1363,7 +1363,7 @@ bool Monster::executeAutoLoot(Player* player, Container* container, std::ostring
 
 	bool autoLootExecuted = false;
 	const AutoLootSet& autoLootList = player->getAutoLootList();
-	if (autoLootList.empty())
+	if (autoLootList.empty() && !player->getAutoLootSetting(AUTOLOOT_GOLD))
 		return false;
 
 	ItemList containerItems = container->getItemList();
@@ -1384,7 +1384,7 @@ bool Monster::executeAutoLoot(Player* player, Container* container, std::ostring
 		}
 
 		if ((itemType.worth && !player->getAutoLootSetting(AUTOLOOT_GOLD))
-			|| (!itemType.worth && autoLootList.find(subItem->getID()) == autoLootList.end()))
+			|| (autoLootList.empty() || (!itemType.worth && autoLootList.find(subItem->getID()) == autoLootList.end())))
 			continue;
 
 		bool begin = true;
