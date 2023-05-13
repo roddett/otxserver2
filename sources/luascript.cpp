@@ -6802,11 +6802,11 @@ int32_t LuaInterface::luaDoCombatAreaHealth(lua_State* L)
 {
 	//doCombatAreaHealth(cid, type, pos, area, min, max, effect[, aggressive, origin = ORIGIN_SPELL])
 	CombatOrigin_t origin = ORIGIN_SPELL;
-	if (lua_gettop(L) > 7)
+	if (lua_gettop(L) > 8)
 		origin = (CombatOrigin_t)popNumber(L);
 
 	bool aggressive = true;
-	if(lua_gettop(L) > 6) // shouldn't it be enough if we check only is conditionType == CONDITION_HEALING?
+	if(lua_gettop(L) > 7) // shouldn't it be enough if we check only is conditionType == CONDITION_HEALING?
 		aggressive = popBoolean(L);
 
 	MagicEffect_t effect = (MagicEffect_t)popNumber(L);
